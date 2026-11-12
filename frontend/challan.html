@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SplitSmart AI — Payment Request</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="challan-page">
+<div class="app-shell">
+    <aside class="sidebar">
+        <a href="dashboard.html" class="brand">
+            <span class="brand-fish">SS</span>
+            <div class="brand-text">
+                <strong>SplitSmart <em>AI</em></strong>
+                <small>Expense Management</small>
+            </div>
+        </a>
+        <p class="side-label">WORKSPACE</p>
+        <nav class="side-nav">
+            <a href="dashboard.html" class="nav-link"><span>⌂</span> Dashboard</a>
+            <a href="expenses.html" class="nav-link"><span>↔</span> Expenses</a>
+            <a href="receipt.html" class="nav-link"><span>▤</span> Smart Receipt</a>
+            <a href="settlement.html" class="nav-link"><span>⇄</span> Settlements</a>
+        </nav>
+        <div class="sidebar-footer"><span class="online-dot"></span> SplitSmart AI Connected</div>
+        <div class="sidebar-logout">
+            <button type="button" id="logoutButton">↪ Sign Out</button>
+        </div>
+    </aside>
+
+    <main class="main-area">
+        <header class="topbar">
+            <div>
+                <span class="eyebrow">PAYMENT DOCUMENT</span>
+                <h2 id="challanHeading">Payment request</h2>
+            </div>
+            <a class="text-link" href="dashboard.html">Back to dashboard</a>
+        </header>
+        <div id="challanHost">
+            <div class="loading-state">Loading payment request...</div>
+        </div>
+        <footer class="page-footer">
+            <span>SplitSmart AI</span>
+            <span>·</span>
+            <span>PayPal Sandbox only</span>
+        </footer>
+    </main>
+</div>
+<script src="js/guard.js"></script>
+<script src="js/challan.js"></script>
+<script src="js/logout.js"></script>
+</body>
+</html>

@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0a192f">
+    <title>Expenses & Balances — SplitSmart AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@36.3.0/styles/ag-grid.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@36.3.0/styles/ag-theme-quartz.css">
+</head>
+
+<body>
+
+<div class="app-shell">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <a class="brand" href="dashboard.html">
+            <span class="brand-fish">SS</span>
+            <div class="brand-text">
+                <strong>SplitSmart <em>AI</em></strong>
+                <small>Expense Management</small>
+            </div>
+        </a>
+
+        <div class="side-label">WORKSPACE</div>
+
+        <nav class="side-nav" aria-label="Main navigation">
+            <a class="nav-link" href="dashboard.html">
+                <span>⌂</span> Dashboard
+            </a>
+            <a class="nav-link active" href="expenses.html">
+                <span>↔</span> Expenses
+            </a>
+            <a class="nav-link" href="receipt.html">
+                <span>▤</span> Smart Receipt
+            </a>
+            <a class="nav-link" href="settlement.html">
+                <span>⇄</span> Settlements
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <span class="online-dot"></span>
+            Ledger Synchronized
+        </div>
+
+        <div class="sidebar-logout">
+            <button type="button" id="logoutButton">
+                ↪ Sign Out
+            </button>
+        </div>
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="main-area">
+
+        <!-- TOP BAR -->
+        <header class="topbar">
+            <div>
+                <span class="eyebrow">TRANSACTION MANAGEMENT</span>
+                <h2>Expenses & Group Balances</h2>
+            </div>
+            <div class="top-actions">
+                <a class="back-link" href="dashboard.html">
+                    ← Back to Dashboard
+                </a>
+                <div class="avatar">SS</div>
+            </div>
+        </header>
+
+
+        <!-- ADD NEW EXPENSE SECTION (COLLAPSIBLE) -->
+        <section class="panel form-panel collapsible-card">
+            <div class="collapsible-header section-heading">
+                <div>
+                    <span class="eyebrow">EXPENSE ENTRY</span>
+                    <h2>Record New Transaction</h2>
+                </div>
+                <button type="button" class="collapse-toggle" aria-expanded="true" aria-label="Toggle New Expense Form">⌄</button>
+            </div>
+
+            <div class="collapsible-content">
+                <div class="expense-type-switch">
+                    <button type="button" id="groupBillButton" class="expense-type-button active">
+                        Group Bill
+                        <small>Share expense with circle members</small>
+                    </button>
+
+                    <button type="button" id="personalBillButton" class="expense-type-button">
+                        Personal Bill
+                        <small>Private ledger only for me</small>
+                    </button>
+                </div>
+
+                <!-- GROUP EXPENSE FORM -->
+                <form id="expenseForm" class="expense-form">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
+                        <div class="field">
+                            <label for="groupSelect">Expense Group</label>
+                            <select id="groupSelect" required>
+                                <option value="">Loading groups...</option>
+                            </select>
+                        </div>
+
+                        <div class="field">
+                            <label for="payerSelect">Paid By</label>
+                            <select id="payerSelect" required disabled>
+                                <option value="">Select a group first</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 14px;">
+                        <div class="field">
+                            <label for="description">Expense Description</label>
+                            <input type="text" id="description" placeholder="e.g. Dinner, hotel stay, team lunch" maxlength="120" required>
+                        </div>
+
+                        <div class="field">
+                            <label for="amount">Amount ($)</label>
+                            <div class="input-with-icon">
+                                <span>$</span>
+                                <input type="number" id="amount" placeholder="0.00" min="0.01" max="1000000" step="0.01" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="addExpenseBtn" class="button button-primary form-submit" disabled>
+                        Record Group Expense →
+                    </button>
+
+                    <p id="expenseMessage" class="form-message" role="status"></p>
+                </form>
+
+                <!-- PERSONAL EXPENSE FORM -->
+                <form id="personalExpenseForm" class="expense-form" hidden>
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 14px;">
+                        <div class="field">
+                            <label for="personalDescription">Personal Expense Description</label>
+                            <input type="text" id="personalDescription" placeholder="e.g. Coffee, book, groceries" maxlength="120" required>
+                        </div>
+
+                        <div class="field">
+                            <label for="personalAmount">Amount ($)</label>
+                            <div class="input-with-icon">
+                                <span>$</span>
+                                <input type="number" id="personalAmount" placeholder="0.00" min="0.01" max="1000000" step="0.01" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="addPersonalExpenseBtn" class="button button-primary form-submit">
+                        Record Personal Expense →
+                    </button>
+
+                    <p id="personalExpenseMessage" class="form-message" role="status"></p>
+                </form>
+            </div>
+        </section>
+
+
+        <!-- RECEIPT SCANNER BANNER / SECTION -->
+        <section class="panel scanner-panel collapsible-card" id="scanner">
+            <div class="collapsible-header section-heading">
+                <div>
+                    <span class="eyebrow">DOCUMENT RECOGNITION</span>
+                    <h2>Quick Receipt Scanner</h2>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <a href="receipt.html" class="button button-soft" style="font-size: 12px; padding: 6px 12px;">
+                        Open Smart Receipt Studio →
+                    </a>
+                    <button type="button" class="collapse-toggle" aria-expanded="false" aria-label="Toggle Scanner">⌄</button>
+                </div>
+            </div>
+
+            <div class="collapsible-content is-collapsed">
+                <p class="section-subtitle">
+                    Upload an image of your paper receipt to parse line items with Tesseract.js OCR.
+                </p>
+
+                <label class="upload-zone" for="receiptInput">
+                    <span class="upload-icon">📄</span>
+                    <strong>Choose a receipt image</strong>
+                    <small>PNG, JPG, or other image · Up to 5 MB</small>
+                    <input type="file" id="receiptInput" accept="image/*">
+                </label>
+
+                <button type="button" id="scanButton" class="button button-primary">
+                    Scan Receipt with OCR →
+                </button>
+
+                <p id="receiptStatus" class="form-message" role="status"></p>
+
+                <details class="receipt-details">
+                    <summary>View extracted receipt text</summary>
+                    <pre id="receiptResult">Your scanned receipt details will appear here.</pre>
+                </details>
+            </div>
+        </section>
+
+
+        <!-- SMART RECEIPT ITEM ASSIGNMENT (SHOWN AFTER SCAN) -->
+        <section class="panel item-assignment-panel collapsible-card" id="receiptItemsPanel" hidden>
+            <div class="collapsible-header section-heading">
+                <div>
+                    <span class="eyebrow">ITEMIZED SPLIT</span>
+                    <h2>Assign Receipt Items</h2>
+                </div>
+                <button type="button" class="collapse-toggle" aria-expanded="true" aria-label="Toggle Receipt Items">⌄</button>
+            </div>
+
+            <div class="collapsible-content">
+                <p class="section-subtitle">
+                    Review extracted line items and choose which group members share each item.
+                </p>
+
+                <div class="receipt-total-card">
+                    <span>Receipt Total</span>
+                    <strong id="receiptItemsTotal">$0.00</strong>
+                </div>
+
+                <div class="receipt-assign-fields">
+                    <div class="field">
+                        <label for="receiptGroupSelect">Group</label>
+                        <select id="receiptGroupSelect">
+                            <option value="">Select a group</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label for="receiptPayerSelect">Payer</label>
+                        <select id="receiptPayerSelect" disabled>
+                            <option value="">Choose a group first</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="receiptItemsList" class="receipt-items-list">
+                    <p class="empty-state">
+                        Extracted items will appear here.
+                    </p>
+                </div>
+
+                <div class="receipt-split-summary">
+                    <span>Assignment Status</span>
+                    <strong id="receiptAssignmentStatus">No items assigned yet</strong>
+                </div>
+
+                <button type="button" id="saveReceiptItemsBtn" class="button button-primary form-submit" disabled>
+                    Save Itemized Expense →
+                </button>
+
+                <p id="receiptItemsMessage" class="form-message" role="status"></p>
+            </div>
+        </section>
+
+
+        <!-- GROUP EXPENSE HISTORY SECTION (COLLAPSIBLE) -->
+        <section class="panel collapsible-card" id="history">
+            <div class="collapsible-header section-heading">
+                <div>
+                    <span class="eyebrow">AUDIT TRAIL</span>
+                    <h2>Group Expense History</h2>
+                </div>
+                <button type="button" class="collapse-toggle" aria-expanded="true" aria-label="Toggle Expense History">⌄</button>
+            </div>
+
+            <div class="collapsible-content">
+                <p class="section-subtitle">
+                    View, search, and manage expenses recorded across all your groups.
+                </p>
+
+                <!-- FILTERS -->
+                <div class="expense-history-filters">
+                    <div class="field">
+                        <label for="expenseGroupFilter">Filter by Group</label>
+                        <select id="expenseGroupFilter">
+                            <option value="">All groups</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label for="expenseSearch">Search Transactions</label>
+                        <input type="search" id="expenseSearch" placeholder="Search by description or payer...">
+                    </div>
+
+                    <div class="field">
+                        <label for="expenseMemberFilter">Filter by Member</label>
+                        <select id="expenseMemberFilter">
+                            <option value="">All members</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label for="expenseDateFilter">Filter by Date</label>
+                        <input type="date" id="expenseDateFilter">
+                    </div>
+
+                    <div>
+                        <button type="button" id="clearExpenseFilters" class="button button-secondary" style="width: 100%;">
+                            Clear Filters
+                        </button>
+                    </div>
+                </div>
+
+                <div id="expensesList" class="ag-theme-quartz ss-grid expense-history-grid"></div>
+            </div>
+        </section>
+
+
+        <!-- PERSONAL EXPENSE HISTORY (COLLAPSIBLE) -->
+        <section class="panel collapsible-card" id="personalHistoryPanel" hidden>
+            <div class="collapsible-header section-heading">
+                <div>
+                    <span class="eyebrow">PERSONAL RECORDS</span>
+                    <h2>Personal Expense History</h2>
+                </div>
+                <button type="button" class="collapse-toggle" aria-expanded="true" aria-label="Toggle Personal History">⌄</button>
+            </div>
+
+            <div class="collapsible-content">
+                <div id="personalExpensesList" class="data-list">
+                    <p class="empty-state">Your personal expenses will appear here.</p>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- GROUP BALANCES (COLLAPSIBLE) -->
+        <section class="panel collapsible-card" id="balances">
+            <div class="collapsible-header section-heading">
+                <div>
+                    <span class="eyebrow">BALANCE SHEET</span>
+                    <h2>Group Balances</h2>
+                </div>
+                <button type="button" class="collapse-toggle" aria-expanded="true" aria-label="Toggle Balances">⌄</button>
+            </div>
+
+            <div class="collapsible-content">
+                <p class="section-subtitle">
+                    Member-by-member calculation of total paid, allocated shares, and net balance.
+                </p>
+                <div id="balancesList" class="data-list">
+                    <p class="empty-state">Select a group to calculate balances.</p>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- SMART SETTLEMENTS (COLLAPSIBLE) -->
+        <section class="panel collapsible-card" id="settlements">
+            <div class="collapsible-header section-heading">
+                <div>
+                    <span class="eyebrow">DEBT SIMPLIFICATION</span>
+                    <h2>Smart Settlement Suggestions</h2>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <a href="settlement.html" class="button button-soft" style="font-size: 12px; padding: 6px 12px;">
+                        Open Settlements Page →
+                    </a>
+                    <button type="button" class="collapse-toggle" aria-expanded="true" aria-label="Toggle Settlements">⌄</button>
+                </div>
+            </div>
+
+            <div class="collapsible-content">
+                <p class="section-subtitle">
+                    Optimal payment transactions to balance debts with minimal transfers.
+                </p>
+
+                <div id="settlementProgress" class="section-subtitle" style="font-weight: 600; color: var(--primary);">
+                    No settlements completed yet.
+                </div>
+
+                <div id="settlementsList" class="data-list">
+                    <p class="empty-state">Select a group to see settlement suggestions.</p>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- SPENDING INTELLIGENCE (COLLAPSIBLE) -->
+        <section class="panel spending-intelligence collapsible-card" id="spendingIntelligence">
+            <div class="collapsible-header section-heading">
+                <div>
+                    <span class="eyebrow">SPENDING ANALYTICS</span>
+                    <h2>Group Spending Intelligence</h2>
+                </div>
+                <button type="button" class="collapse-toggle" aria-expanded="true" aria-label="Toggle Analytics">⌄</button>
+            </div>
+
+            <div class="collapsible-content">
+                <p class="section-subtitle">
+                    Category analysis and spending trends for the active group.
+                </p>
+
+                <div class="insight-summary-grid">
+                    <div class="stat-card">
+                        <div class="stat-top"><span>Total Spent</span></div>
+                        <strong class="stat-value" id="insightTotalSpent">$0.00</strong>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-top"><span>Total Expenses</span></div>
+                        <strong class="stat-value" id="insightExpenseCount">0</strong>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-top"><span>Top Category</span></div>
+                        <strong class="stat-value" id="insightTopCategory">--</strong>
+                    </div>
+                </div>
+
+                <div class="analytics-detail-grid">
+                    <div class="analytics-card">
+                        <h3>Spending by Category</h3>
+                        <div id="categoryBreakdown" class="category-breakdown" style="height: 260px; position: relative;">
+                            <p>Select a group to see spending categories.</p>
+                        </div>
+                    </div>
+
+                    <div class="analytics-card">
+                        <h3>Monthly Trends</h3>
+                        <div id="monthlySpending" class="monthly-spending" style="height: 260px; position: relative;">
+                            <p>Monthly analytics will appear here.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="analytics-card" style="margin-top: 16px;">
+                    <h3>Finny's Spending Insights</h3>
+                    <div id="smartInsights">
+                        <p>Finny is waiting for your group data.</p>
+                    </div>
+                </div>
+
+                <p id="insightStatus" role="status" class="form-message"></p>
+            </div>
+        </section>
+
+
+        <!-- FOOTER -->
+        <footer class="page-footer">
+            <span>SplitSmart AI</span>
+            <span>·</span>
+            <span>Accurate Financial Management</span>
+            <span>·</span>
+            <span>PayPal AI Hackathon Edition</span>
+        </footer>
+
+    </main>
+
+</div>
+
+
+<!-- ==========================================
+     FLOATING FINNY AI ASSISTANT
+     ========================================== -->
+<button
+    type="button"
+    class="finny-floating-button"
+    id="finnyFloatingButton"
+    aria-label="Open Finny AI Assistant"
+    aria-expanded="false">
+    <span>SS</span>
+</button>
+
+<div class="finny-floating-panel" id="finnyFloatingPanel" aria-hidden="true">
+
+    <div class="finny-panel-header">
+        <div class="finny-panel-brand">
+            <div class="brand-fish">SS</div>
+            <div class="finny-panel-title">
+                <strong>Finny Assistant</strong>
+                <small>Financial AI & Analytics</small>
+            </div>
+        </div>
+
+        <button type="button" class="finny-close-button" id="finnyCloseButton" aria-label="Close Assistant">
+            ✕
+        </button>
+    </div>
+
+    <div class="ai-assistant-panel" id="aiAssistant">
+
+        <div class="ai-chat-window" id="aiChatWindow">
+            <div class="ai-message assistant-message">
+                <div class="ai-message-avatar">SS</div>
+                <div class="ai-message-content">
+                    <strong>Finny</strong>
+                    <p>
+                        Hi there! I am Finny. Ask me about your group expenses, balances, who owes whom, or recent transactions.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="ai-suggestions">
+            <button type="button" class="ai-suggestion" data-question="Who owes the most money?">
+                Who owes most?
+            </button>
+            <button type="button" class="ai-suggestion" data-question="Explain our group balances.">
+                Explain balances
+            </button>
+            <button type="button" class="ai-suggestion" data-question="What are our biggest expenses?">
+                Biggest expenses
+            </button>
+            <button type="button" class="ai-suggestion" data-question="How much has our group spent in total?">
+                Total group spending
+            </button>
+            <button type="button" class="ai-suggestion" data-question="What are our suggested settlements?">
+                Suggested settlements
+            </button>
+        </div>
+
+        <form id="aiChatForm" class="ai-chat-form">
+            <input
+                type="text"
+                id="aiQuestionInput"
+                placeholder="Ask Finny about expenses or balances..."
+                maxlength="500"
+                autocomplete="off"
+                required>
+
+            <button type="submit" id="aiSendButton" class="button button-primary">
+                Send
+            </button>
+        </form>
+
+        <p id="aiChatStatus" class="form-message" role="status"></p>
+
+        <small class="ai-disclaimer">
+            Finny explains verified ledger figures with Gemini. Suggestions do not move money.
+        </small>
+
+    </div>
+
+</div>
+
+
+<!-- SCRIPTS -->
+<script src="js/guard.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/ag-grid-community@36.3.0/dist/ag-grid-community.min.js"></script>
+<script src="js/grid.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="js/receipt-ocr.js"></script>
+<script src="js/expenses.js"></script>
+<script src="js/analytics.js"></script>
+<script src="js/assistant.js"></script>
+<script src="js/logout.js"></script>
+<script src="js/ui-enhancements.js"></script>
+</body>
+</html>

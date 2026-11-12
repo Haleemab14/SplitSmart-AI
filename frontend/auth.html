@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SplitSmart AI — Sign In & Register</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="auth-page">
+
+    <div class="auth-container">
+        <div class="auth-header">
+            <div class="auth-logo">
+                <span>SS</span>
+            </div>
+            <h1>SplitSmart AI</h1>
+            <p>Intelligent Expense Management & Fair Bill-Splitting</p>
+        </div>
+
+        <div class="auth-tabs" role="tablist">
+            <button type="button" class="auth-tab active" id="tabLogin" role="tab" aria-selected="true">
+                Sign In
+            </button>
+            <button type="button" class="auth-tab" id="tabRegister" role="tab" aria-selected="false">
+                Create Account
+            </button>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <form id="loginForm" class="auth-form">
+            <div class="field">
+                <label for="loginUsername">Username</label>
+                <input
+                    id="loginUsername"
+                    type="text"
+                    placeholder="Enter your username"
+                    autocomplete="username"
+                    required>
+            </div>
+
+            <div class="field">
+                <label for="loginPassword">Password</label>
+                <input
+                    id="loginPassword"
+                    type="password"
+                    placeholder="Enter your password"
+                    autocomplete="current-password"
+                    required>
+            </div>
+
+            <button type="submit" class="button button-primary auth-button">
+                Sign In →
+            </button>
+        </form>
+
+        <!-- REGISTER FORM -->
+        <form id="registerForm" class="auth-form" style="display: none;">
+            <div class="field">
+                <label for="registerUsername">Username</label>
+                <input
+                    id="registerUsername"
+                    type="text"
+                    placeholder="3–25 letters, numbers or underscores"
+                    autocomplete="username"
+                    pattern="[a-zA-Z0-9_]{3,25}"
+                    required>
+            </div>
+
+            <div class="field">
+                <label for="registerPassword">Password</label>
+                <input
+                    id="registerPassword"
+                    type="password"
+                    placeholder="At least 10 characters"
+                    autocomplete="new-password"
+                    minlength="10"
+                    required>
+            </div>
+
+            <div class="field">
+                <label for="confirmPassword">Confirm Password</label>
+                <input
+                    id="confirmPassword"
+                    type="password"
+                    placeholder="Re-type your password"
+                    autocomplete="new-password"
+                    minlength="10"
+                    required>
+            </div>
+
+            <button type="submit" class="button button-primary auth-button">
+                Create Account →
+            </button>
+        </form>
+
+        <p id="authMessage" class="form-message" role="status" style="text-align: center; margin-top: 14px;"></p>
+
+        <div class="auth-footer">
+            <span id="switchLabel">Don't have an account?</span>
+            <button type="button" id="switchButton">Create Account</button>
+        </div>
+    </div>
+
+    <script>
+        fetch("/api/auth/me", { credentials: "same-origin" })
+            .then(res => { if (res.ok) window.location.replace("/dashboard.html"); })
+            .catch(err => console.error("Session check failed:", err));
+    </script>
+    <script src="js/auth.js"></script>
+</body>
+</html>

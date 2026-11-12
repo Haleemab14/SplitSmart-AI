@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SplitSmart AI — Financial Dashboard</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@36.3.0/styles/ag-grid.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@36.3.0/styles/ag-theme-quartz.css">
+</head>
+
+<body>
+
+<div class="app-shell">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <a href="dashboard.html" class="brand">
+            <span class="brand-fish">SS</span>
+            <div class="brand-text">
+                <strong>SplitSmart <em>AI</em></strong>
+                <small>Expense Management</small>
+            </div>
+        </a>
+
+        <p class="side-label">WORKSPACE</p>
+
+        <nav class="side-nav">
+            <a href="dashboard.html" class="nav-link active">
+                <span>⌂</span> Dashboard
+            </a>
+
+            <a href="expenses.html" class="nav-link">
+                <span>↔</span> Expenses
+            </a>
+
+            <a href="receipt.html" class="nav-link">
+                <span>▤</span> Smart Receipt
+            </a>
+
+            <a href="settlement.html" class="nav-link">
+                <span>⇄</span> Settlements
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <span class="online-dot"></span>
+            SplitSmart AI Connected
+        </div>
+
+        <div class="sidebar-logout">
+            <button type="button" id="logoutButton">
+                ↪ Sign Out
+            </button>
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="main-area">
+
+        <!-- TOP BAR -->
+        <header class="topbar">
+            <div>
+                <span class="eyebrow">FINANCIAL INTELLIGENCE</span>
+                <h2>Dashboard</h2>
+            </div>
+
+            <div class="top-actions">
+                <div class="search-box">
+                    <span>⌕</span>
+                    <input
+                        type="search"
+                        id="dashboardSearch"
+                        placeholder="Search dashboard..."
+                        aria-label="Search dashboard">
+                </div>
+
+                <div class="avatar" id="userAvatar">SS</div>
+            </div>
+        </header>
+        <div id="workspaceSearchResults" class="workspace-search-results" hidden></div>
+
+
+        <!-- ACCOUNT OVERVIEW CARD -->
+        <section class="panel profile-card collapsible-card" id="profilePanel">
+            <div class="collapsible-header">
+                <div style="display: flex; align-items: center; gap: 14px;">
+                    <div class="profile-avatar">SS</div>
+                    <div class="profile-details">
+                        <span class="profile-label">ACCOUNT POSITION</span>
+                        <h3 id="profileUsername">Loading account...</h3>
+                        <p>Personal & group expense portfolio</p>
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div class="profile-status">
+                        <span class="profile-status-dot"></span>
+                        Active Session
+                    </div>
+                    <button type="button" class="collapse-toggle" aria-expanded="true" aria-label="Toggle Account Overview">⌄</button>
+                </div>
+            </div>
+
+            <div class="collapsible-content">
+                <div class="account-details-content" style="padding-top: 12px; border-top: 1px solid var(--border-color); margin-top: 12px;">
+                    <p>
+                        <strong>Username:</strong>
+                        <span id="profileDetailUsername">Loading...</span>
+                    </p>
+                    <p>
+                        <strong>User ID:</strong>
+                        <span id="profileAccountId">Loading...</span>
+                    </p>
+                    <p>
+                        <strong>Status:</strong>
+                        Verified
+                    </p>
+                    <p>
+                        <strong>Currency:</strong>
+                        USD ($)
+                    </p>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- SERVER STATUS -->
+        <div class="dashboard-system-status">
+            <span class="online-dot"></span>
+            <span id="serverStatus">Checking system connection...</span>
+        </div>
+
+
+        <!-- FINANCIAL SUMMARY STATS (INDIVIDUALLY COLLAPSIBLE / EXPANDABLE) -->
+        <section class="stats-grid" id="dashboardStats">
+
+            <article class="stat-card collapsible-card">
+                <div class="stat-top collapsible-header">
+                    <span>Group Spending</span>
+                    <button type="button" class="collapse-toggle" aria-expanded="true" aria-label="Toggle group spending">⌄</button>
+                </div>
+                <div class="collapsible-content">
+                    <strong class="stat-value" id="groupExpenseTotal">$0.00</strong>
+                    <small id="groupExpenseMeta">Loading group expenses...</small>
+                </div>
+            </article>
+
+            <article class="stat-card collapsible-card">
+                <div class="stat-top collapsible-header">
+                    <span>Personal Spending</span>
+                    <button type="button" class="collapse-toggle" aria-expanded="true" aria-label="Toggle personal spending">⌄</button>
+                </div>
+                <div class="collapsible-content">
+                    <strong class="stat-value" id="personalExpenseTotal">$0.00</strong>
+                    <small id="personalExpenseMeta">Loading personal expenses...</small>
+                </div>
+            </article>
+
+            <article class="stat-card collapsible-card">
+                <div class="stat-top collapsible-header">
+                    <span>Active Groups</span>
+                    <button type="button" class="collapse-toggle" aria-expanded="true" aria-label="Toggle group count">⌄</button>
+                </div>
+                <div class="collapsible-content">
+                    <strong class="stat-value" id="groupCount">0</strong>
+                    <small>Organized expense groups</small>
+                </div>
+            </article>
+
+            <article class="stat-card collapsible-card">
+                <div class="stat-top collapsible-header">
+                    <span>Finny Assistant</span>
+                    <button type="button" class="collapse-toggle" aria-expanded="true" aria-label="Toggle assistant status">⌄</button>
+                </div>
+                <div class="collapsible-content">
+                    <strong class="stat-value">Ready</strong>
+                    <small>Open Finny for group questions</small>
+                </div>
+            </article>
+
+        </section>
+
+
+        <!-- SPENDING INTELLIGENCE & ANALYTICS (COLLAPSIBLE) -->
+        <section class="panel dashboard-section collapsible-card" id="spendingIntelligence">
+
+            <div class="collapsible-header section-heading">
+                <div>
+                    <span class="eyebrow">ANALYTICS & VISUALIZATIONS</span>
+                    <h2>Spending Intelligence</h2>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span class="pill">Visual Insights</span>
+                    <button type="button" class="collapse-toggle" aria-expanded="true" aria-label="Toggle Spending Intelligence">⌄</button>
+                </div>
+            </div>
+
+            <div class="collapsible-content" id="spendingIntelligenceContent">
+
+                <!-- GROUP SELECTOR -->
+                <div class="field analytics-selector">
+                    <label for="analyticsGroupSelect">
+                        Select Group for Deep Analysis
+                    </label>
+                    <select id="analyticsGroupSelect">
+                        <option value="">Select a group</option>
+                    </select>
+                </div>
+
+                <div id="analyticsContent">
+
+                    <!-- ANALYTICS SUMMARY -->
+                    <div class="analytics-summary-grid">
+                        <div class="stat-card">
+                            <div class="stat-top">
+                                <span>Group Total Spent</span>
+                            </div>
+                            <strong class="stat-value" id="insightTotalSpent">
+                                $0.00
+                            </strong>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-top">
+                                <span>Total Transactions</span>
+                            </div>
+                            <strong class="stat-value" id="insightExpenseCount">
+                                0
+                            </strong>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-top">
+                                <span>Top Category</span>
+                            </div>
+                            <strong class="stat-value" id="insightTopCategory">
+                                --
+                            </strong>
+                        </div>
+                    </div>
+
+                    <!-- CHARTS GRID -->
+                    <div class="analytics-detail-grid">
+                        <div class="analytics-card">
+                            <h3>Spending by Category</h3>
+                            <div id="categoryBreakdown" style="height: 280px; position: relative;">
+                                Loading category breakdown...
+                            </div>
+                        </div>
+
+                        <div class="analytics-card">
+                            <h3>Monthly Spending Trends</h3>
+                            <div id="monthlySpending" style="height: 280px; position: relative;">
+                                Loading monthly spending...
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SMART INSIGHTS -->
+                    <div class="analytics-card" style="margin-bottom: 20px;">
+                        <h3>Finny's Smart Spending Discoveries</h3>
+                        <div id="smartInsights">
+                            Preparing spending insights...
+                        </div>
+                    </div>
+
+                    <!-- EXPENSE EXPLORER (AG GRID) -->
+                    <div class="analytics-card expense-grid-panel">
+                        <div class="section-heading">
+                            <div>
+                                <h3>Expense Explorer</h3>
+                                <p class="section-subtitle">
+                                    Search, filter, and sort all transactions in the selected group.
+                                </p>
+                            </div>
+                            <span class="pill">AG Grid Powered</span>
+                        </div>
+
+                        <div class="expense-grid-toolbar">
+                            <input
+                                type="search"
+                                id="expenseGridSearch"
+                                placeholder="Search grid expenses..."
+                                aria-label="Search grid expenses">
+
+                            <span id="expenseGridStatus" aria-live="polite">
+                                Loading expenses...
+                            </span>
+                        </div>
+
+                        <div id="expenseGrid" class="ag-theme-quartz ss-grid" style="width: 100%; height: 380px;"></div>
+                    </div>
+
+                    <p id="insightStatus" aria-live="polite" class="form-message"></p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- RECENT ACTIVITY (COLLAPSIBLE) -->
+        <section class="panel activity-panel dashboard-section collapsible-card" id="activityPanel">
+
+            <div class="collapsible-header section-heading">
+                <div>
+                    <span class="eyebrow">TRANSACTION LEDGER</span>
+                    <h2>Recent Activity</h2>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <a href="expenses.html" class="text-link" style="font-size: 13px; font-weight: 600;">
+                        Manage all expenses →
+                    </a>
+                    <button type="button" class="collapse-toggle" aria-expanded="true" aria-label="Toggle Recent Activity">⌄</button>
+                </div>
+            </div>
+
+            <div class="collapsible-content">
+                <div class="activity-list" id="recentActivityList">
+                    <div class="loading-state">
+                        Loading recent transactions...
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- GROUP MANAGEMENT (COLLAPSIBLE) -->
+        <section class="panel dashboard-section collapsible-card" id="groupsPanel">
+
+            <div class="collapsible-header section-heading">
+                <div>
+                    <span class="eyebrow">MEMBERS & CIRCLES</span>
+                    <h2>Expense Groups</h2>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <button
+                        type="button"
+                        class="button button-primary"
+                        id="createGroupBtn">
+                        + New Group
+                    </button>
+                    <button type="button" class="collapse-toggle" aria-expanded="true" aria-label="Toggle Groups">⌄</button>
+                </div>
+            </div>
+
+            <div class="collapsible-content">
+                <p class="section-subtitle">
+                    Manage your shared circles, configure active members, and organize expense splits.
+                </p>
+
+                <div class="join-member-panel" id="joinMemberPanel">
+                    <h3>Join an existing member</h3>
+                    <p>
+                        Use your second account to request an existing member name. The group owner approves the link. No new member or group is created.
+                    </p>
+                    <form id="joinLookupForm" class="join-member-form">
+                        <label>
+                            Group name
+                            <input id="joinGroupName" type="text" maxlength="100" required>
+                        </label>
+                        <label>
+                            Owner username
+                            <input id="joinOwnerName" type="text" maxlength="25" required>
+                        </label>
+                        <button type="submit" class="button button-primary">Find member</button>
+                    </form>
+                    <div id="joinLookupResult"></div>
+                    <div id="joinRequestLists"></div>
+                </div>
+
+                <div class="groups-list" id="groupsList">
+                    <div class="loading-state">
+                        Loading your groups...
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- YOUR MONEY POSITION -->
+        <section class="panel dashboard-section collapsible-card" id="personalDebtsPanel">
+            <div class="collapsible-header section-heading">
+                <div>
+                    <span class="eyebrow">YOUR MONEY POSITION</span>
+                    <h2>Your money position</h2>
+                </div>
+                <button type="button" class="collapse-toggle" aria-expanded="true" aria-label="Toggle your money position">⌄</button>
+            </div>
+
+            <div class="collapsible-content">
+                <div id="personalDebtHost">
+                    <div class="loading-state">Loading your money position...</div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- GROUP BALANCES & SETTLEMENTS -->
+        <section class="panel dashboard-section balances-panel" id="groupFinancialOverview">
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">BALANCES</span>
+                    <h2>Group Balances &amp; Settlements</h2>
+                </div>
+            </div>
+
+            <p class="section-subtitle">
+                Member positions and the payments that would settle each group.
+            </p>
+
+            <div id="combinedBalanceHost"></div>
+            <div id="financialGroupList" class="ss-financial-groups">
+                <div class="loading-state">Loading group balances...</div>
+            </div>
+        </section>
+
+
+        <!-- FOOTER -->
+        <footer class="page-footer">
+            <span>SplitSmart AI</span>
+            <span>·</span>
+            <span>PayPal AI Hackathon Edition</span>
+            <span>·</span>
+            <span>Secure & Fair Financial Management</span>
+        </footer>
+
+    </main>
+
+</div>
+
+
+<!-- ==========================================
+     FLOATING FINNY AI ASSISTANT
+     ========================================== -->
+<button
+    type="button"
+    class="finny-floating-button"
+    id="finnyFloatingButton"
+    aria-label="Open Finny AI Assistant"
+    aria-expanded="false">
+    <span>SS</span>
+</button>
+
+<div class="finny-floating-panel" id="finnyFloatingPanel" aria-hidden="true">
+
+    <div class="finny-panel-header">
+        <div class="finny-panel-brand">
+            <div class="brand-fish">SS</div>
+            <div class="finny-panel-title">
+                <strong>Finny Assistant</strong>
+                <small>Financial AI & Analytics</small>
+            </div>
+        </div>
+
+        <button type="button" class="finny-close-button" id="finnyCloseButton" aria-label="Close Assistant">
+            ✕
+        </button>
+    </div>
+
+    <div class="ai-assistant-panel">
+
+        <div class="field assistant-group-selector">
+            <label for="groupSelect">Active Group</label>
+            <select id="groupSelect">
+                <option value="">Select a group</option>
+            </select>
+        </div>
+
+        <!-- CHAT WINDOW -->
+        <div class="ai-chat-window" id="aiChatWindow">
+            <div class="ai-message assistant-message">
+                <div class="ai-message-avatar">SS</div>
+                <div class="ai-message-content">
+                    <strong>Finny</strong>
+                    <p>
+                        Hello! I am Finny, your SplitSmart AI financial assistant. Ask me anything about your group spending, balances, who owes whom, or search your receipts.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SUGGESTED QUESTIONS -->
+        <div class="ai-suggestions">
+            <button
+                type="button"
+                class="ai-suggestion"
+                data-question="How much has our group spent in total?">
+                Group Total?
+            </button>
+
+            <button
+                type="button"
+                class="ai-suggestion"
+                data-question="Who owes the most money?">
+                Who Owes Most?
+            </button>
+
+            <button
+                type="button"
+                class="ai-suggestion"
+                data-question="Explain our group balances.">
+                Explain Balances
+            </button>
+
+            <button
+                type="button"
+                class="ai-suggestion"
+                data-question="What are our biggest expenses?">
+                Biggest Expenses?
+            </button>
+
+            <button
+                type="button"
+                class="ai-suggestion"
+                data-question="Give me a group spending report.">
+                Spending Report
+            </button>
+        </div>
+
+        <!-- CHAT INPUT -->
+        <form class="ai-chat-form" id="aiChatForm">
+            <input
+                type="text"
+                id="aiQuestionInput"
+                placeholder="Ask Finny a financial question..."
+                autocomplete="off"
+                required>
+
+            <button type="submit" id="aiSendButton" class="button button-primary">
+                Send
+            </button>
+        </form>
+
+        <p class="ai-chat-status" id="aiChatStatus" aria-live="polite"></p>
+
+        <small class="ai-disclaimer">
+            Finny explains verified ledger figures with Gemini. Suggestions do not move money.
+        </small>
+
+    </div>
+
+</div>
+
+
+<!-- SCRIPTS -->
+<script src="js/guard.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/ag-grid-community@36.3.0/dist/ag-grid-community.min.js"></script>
+<script src="js/grid.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // Load current authenticated user profile
+    async function loadUserProfile() {
+        const usernameElement = document.getElementById("profileUsername");
+        const detailUsername = document.getElementById("profileDetailUsername");
+        const accountId = document.getElementById("profileAccountId");
+        const userAvatar = document.getElementById("userAvatar");
+
+        try {
+            const response = await fetch("/api/auth/me", { credentials: "same-origin" });
+            if (!response.ok) {
+                window.location.replace("/auth.html");
+                return;
+            }
+            const data = await response.json();
+            if (data.success && data.user) {
+                const name = data.user.username || "User";
+                if (usernameElement) usernameElement.textContent = name;
+                if (detailUsername) detailUsername.textContent = name;
+                if (accountId) accountId.textContent = `SS-${data.user.id}`;
+                if (userAvatar) userAvatar.textContent = name.substring(0, 2).toUpperCase();
+            }
+        } catch (error) {
+            console.error("Profile loading failed:", error);
+        }
+    }
+    loadUserProfile();
+</script>
+
+<script src="js/app.js"></script>
+<script src="js/join-group.js"></script>
+<script src="js/debts.js"></script>
+<script src="js/analytics.js"></script>
+<script src="js/assistant.js"></script>
+<script src="js/logout.js"></script>
+<script src="js/ui-enhancements.js"></script>
+</body>
+</html>

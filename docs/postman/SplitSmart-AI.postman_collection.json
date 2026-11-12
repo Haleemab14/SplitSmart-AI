@@ -1,0 +1,146 @@
+{
+  "info": {
+    "name": "SplitSmart AI",
+    "description": "Public API examples for SplitSmart AI. Cookie authentication uses the httpOnly authToken set by /api/auth/login. Do not store passwords or live secrets in this collection.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "groupId", "value": "1" },
+    { "key": "challanRef", "value": "SS-CH-YYYYMMDD-XXXXXXXX" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/health"
+      }
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"demo_user\",\n  \"password\": \"replace-with-a-local-password\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/register"
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"demo_user\",\n  \"password\": \"replace-with-a-local-password\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login",
+            "description": "Saves an httpOnly authToken cookie. Later requests must send cookies."
+          }
+        },
+        {
+          "name": "Current user",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/auth/me"
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/logout"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Groups",
+      "item": [
+        { "name": "List groups", "request": { "method": "GET", "url": "{{baseUrl}}/api/groups" } },
+        {
+          "name": "Create group",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Weekend\",\n  \"members\": [\"Alex\", \"Jordan\", \"Sam\"]\n}"
+            },
+            "url": "{{baseUrl}}/api/groups"
+          }
+        },
+        {
+          "name": "Join lookup",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/groups/join-lookup?name=Weekend&owner=demo_user"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Expenses and ledger",
+      "item": [
+        { "name": "Group expenses", "request": { "method": "GET", "url": "{{baseUrl}}/api/groups/{{groupId}}/expenses" } },
+        { "name": "Balances", "request": { "method": "GET", "url": "{{baseUrl}}/api/groups/{{groupId}}/balances" } },
+        { "name": "Settlements", "request": { "method": "GET", "url": "{{baseUrl}}/api/groups/{{groupId}}/settlements" } },
+        { "name": "Settlement history", "request": { "method": "GET", "url": "{{baseUrl}}/api/groups/{{groupId}}/settlement-history" } },
+        { "name": "Analytics", "request": { "method": "GET", "url": "{{baseUrl}}/api/groups/{{groupId}}/analytics" } }
+      ]
+    },
+    {
+      "name": "Search",
+      "item": [
+        {
+          "name": "Workspace search",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/search?q=cafe"
+          }
+        },
+        {
+          "name": "Group search",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/groups/{{groupId}}/assistant-search?q=cafe"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        { "name": "PayPal config", "request": { "method": "GET", "url": "{{baseUrl}}/api/paypal/config" } },
+        { "name": "My debts", "request": { "method": "GET", "url": "{{baseUrl}}/api/me/debts" } },
+        {
+          "name": "Open challan",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/payment-requests/{{challanRef}}"
+          }
+        },
+        {
+          "name": "Create PayPal order",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fromId\": 1,\n  \"toId\": 2\n}"
+            },
+            "url": "{{baseUrl}}/api/groups/{{groupId}}/paypal/orders",
+            "description": "Amount comes from the ledger. Do not send an amount from the client."
+          }
+        }
+      ]
+    }
+  ]
+}

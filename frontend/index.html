@@ -1,0 +1,31 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SplitSmart AI</title>
+</head>
+<body>
+    <p>Loading SplitSmart AI...</p>
+
+    <script>
+        (async function () {
+            try {
+                const response = await fetch("/api/auth/me", {
+                    credentials: "same-origin"
+                });
+
+                if (response.ok) {
+                    window.location.replace("/dashboard.html");
+                } else {
+                    window.location.replace("/auth.html");
+                }
+            } catch (error) {
+                console.error("Authentication check failed:", error);
+                window.location.replace("/auth.html");
+            }
+        })();
+    </script>
+</body>
+</html>

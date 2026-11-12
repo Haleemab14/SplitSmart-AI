@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SplitSmart AI — Smart Receipt Scanner & Splitting</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<div class="app-shell">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <a href="dashboard.html" class="brand">
+            <span class="brand-fish">SS</span>
+            <div class="brand-text">
+                <strong>SplitSmart <em>AI</em></strong>
+                <small>Expense Management</small>
+            </div>
+        </a>
+
+        <p class="side-label">WORKSPACE</p>
+
+        <nav class="side-nav">
+            <a href="dashboard.html" class="nav-link">
+                <span>⌂</span> Dashboard
+            </a>
+
+            <a href="expenses.html" class="nav-link">
+                <span>↔</span> Expenses
+            </a>
+
+            <a href="receipt.html" class="nav-link active">
+                <span>▤</span> Smart Receipt
+            </a>
+
+            <a href="settlement.html" class="nav-link">
+                <span>⇄</span> Settlements
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <span class="online-dot"></span>
+            OCR Engine Ready
+        </div>
+
+        <div class="sidebar-logout">
+            <button type="button" id="logoutButton">
+                ↪ Sign Out
+            </button>
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="main-area">
+
+        <!-- TOP BAR -->
+        <header class="topbar">
+            <div>
+                <span class="eyebrow">DOCUMENT INTELLIGENCE</span>
+                <h2>Smart Receipt Scanner</h2>
+            </div>
+
+            <div class="top-actions">
+                <a href="expenses.html" class="back-link">
+                    ← Back to Expenses
+                </a>
+                <div class="avatar">SS</div>
+            </div>
+        </header>
+
+
+        <!-- RECEIPT SCANNER SECTION (STEP 1 & 2) -->
+        <section class="panel scanner-panel collapsible-card" id="scannerPanel">
+            <div class="collapsible-header section-heading">
+                <div>
+                    <span class="eyebrow">STEP 1: CAPTURE & RECOGNIZE</span>
+                    <h2>Upload & OCR Scan Receipt</h2>
+                </div>
+                <button type="button" class="collapse-toggle" aria-expanded="true" aria-label="Toggle Receipt Scanner">⌄</button>
+            </div>
+
+            <div class="collapsible-content">
+                <p class="section-subtitle">
+                    Upload any paper or digital receipt. Tesseract.js OCR will detect the merchant, date, line items, and total amount.
+                </p>
+
+                <label class="upload-zone" for="receiptInput" id="uploadZone">
+                    <span class="upload-icon">📄</span>
+                    <strong id="uploadPrompt">Choose or drag a receipt image</strong>
+                    <small>PNG, JPG, WEBP, or PDF image · Up to 5 MB</small>
+                    <input type="file" id="receiptInput" accept="image/*">
+                </label>
+
+                <!-- PREVIEW CONTAINER -->
+                <div id="receiptPreviewContainer" style="display: none; text-align: center; margin-bottom: 16px;">
+                    <img id="receiptPreviewImage" src="" alt="Receipt preview" style="max-height: 240px; margin: 0 auto; border-radius: var(--radius-sm); border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);">
+                </div>
+
+                <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                    <button type="button" id="scanButton" class="button button-primary">
+                        Scan Receipt with OCR →
+                    </button>
+                    <button type="button" id="manualEntryBtn" class="button button-secondary">
+                        Enter Receipt Manually
+                    </button>
+                </div>
+
+                <div id="ocrProgressBar" style="display: none; width: 100%; height: 6px; background-color: var(--bg-subtle); border-radius: 3px; overflow: hidden; margin-top: 14px;">
+                    <div id="ocrProgressFill" style="width: 0%; height: 100%; background: var(--primary-gradient); transition: width 0.2s ease;"></div>
+                </div>
+
+                <p id="receiptStatus" class="form-message" role="status" style="margin-top: 12px;"></p>
+
+                <details class="receipt-details" id="ocrRawDetails" style="margin-top: 14px;">
+                    <summary>View Extracted OCR Text</summary>
+                    <pre id="receiptResult">Scanned OCR text will appear here.</pre>
+                </details>
+            </div>
+        </section>
+
+
+        <!-- REVIEW & ASSIGNMENT SECTION (STEP 3 & 4) -->
+        <section class="panel item-assignment-panel collapsible-card" id="receiptItemsPanel">
+
+            <div class="collapsible-header section-heading">
+                <div>
+                    <span class="eyebrow">STEP 2: CORRECTION & EXPENSE TYPE</span>
+                    <h2>Receipt Details & Bill Allocation</h2>
+                </div>
+                <button type="button" class="collapse-toggle" aria-expanded="true" aria-label="Toggle Receipt Allocation">⌄</button>
+            </div>
+
+            <div class="collapsible-content">
+
+                <!-- EXPENSE TYPE SWITCH (Personal vs Group) -->
+                <div class="expense-type-switch" style="margin-bottom: 20px;">
+                    <button type="button" id="receiptTypeGroup" class="expense-type-button active">
+                        Group Expense
+                        <small>Share with active circle members</small>
+                    </button>
+                    <button type="button" id="receiptTypePersonal" class="expense-type-button">
+                        Personal Expense
+                        <small>Track only in my personal ledger</small>
+                    </button>
+                </div>
+
+                <!-- RECEIPT HEADER FIELDS -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 20px;">
+                    <div class="field" style="margin-bottom: 0;">
+                        <label for="receiptMerchant">Merchant / Description</label>
+                        <input type="text" id="receiptMerchant" placeholder="e.g. Supermarket, Restaurant" maxlength="120" required>
+                    </div>
+
+                    <div class="field" style="margin-bottom: 0;">
+                        <label for="receiptDate">Receipt Date</label>
+                        <input type="date" id="receiptDate">
+                    </div>
+
+                    <div class="field" style="margin-bottom: 0;">
+                        <label for="receiptTotalInput">Detected Receipt Total ($)</label>
+                        <input type="number" id="receiptTotalInput" placeholder="0.00" min="0.01" step="0.01" required>
+                    </div>
+                </div>
+
+                <!-- PERSONAL EXPENSE SAVE PANEL -->
+                <div id="receiptPersonalSection" style="display: none; padding: 18px; background-color: var(--bg-subtle); border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 20px;">
+                    <p style="font-size: 13.5px; color: var(--text-secondary); margin-bottom: 14px;">
+                        This receipt will be recorded directly into your private personal expenses ledger. It will not affect any shared balances.
+                    </p>
+                    <button type="button" id="savePersonalReceiptBtn" class="button button-primary form-submit">
+                        Save Personal Expense →
+                    </button>
+                </div>
+
+                <!-- GROUP EXPENSE ALLOCATION PANEL -->
+                <div id="receiptGroupSection">
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px;">
+                        <div class="field" style="margin-bottom: 0;">
+                            <label for="receiptGroupSelect">Target Group</label>
+                            <select id="receiptGroupSelect" required>
+                                <option value="">Loading your groups...</option>
+                            </select>
+                        </div>
+
+                        <div class="field" style="margin-bottom: 0;">
+                            <label for="receiptPayerSelect">Who Paid for this Receipt?</label>
+                            <select id="receiptPayerSelect" required disabled>
+                                <option value="">Select a group first</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- SPLIT METHOD SWITCH -->
+                    <div class="field">
+                        <label>Splitting Method</label>
+                        <div style="display: flex; gap: 12px; margin-top: 4px;">
+                            <label style="display: flex; align-items: center; gap: 6px; font-weight: 500; cursor: pointer;">
+                                <input type="radio" name="splitMethod" id="splitByItems" value="items" checked>
+                                Split by Individual Items (Itemized)
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 6px; font-weight: 500; cursor: pointer;">
+                                <input type="radio" name="splitMethod" id="splitEqually" value="equal">
+                                Split Total Equally Among All Members
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- SUMMARY TOTAL CARD -->
+                    <div class="receipt-total-card">
+                        <div>
+                            <span>Items Calculated Sum</span>
+                            <div style="font-size: 11px; color: #0369a1;">Must match verified receipt total</div>
+                        </div>
+                        <strong id="receiptItemsTotal">$0.00</strong>
+                    </div>
+
+                    <!-- ITEMIZED ASSIGNMENT CONTAINER -->
+                    <div id="itemizedAssignmentContainer">
+                        <div class="section-heading" style="margin-bottom: 12px;">
+                            <div>
+                                <h3 style="font-size: 15px;">Itemized Line Items</h3>
+                                <p class="section-subtitle" style="margin-bottom: 0;">
+                                    Assign each item to the members who enjoyed it. Items can be split among multiple people.
+                                </p>
+                            </div>
+
+                            <button type="button" id="addReceiptItemBtn" class="button button-secondary" style="font-size: 12px; padding: 6px 12px;">
+                                + Add Line Item
+                            </button>
+                        </div>
+
+                        <div id="receiptItemsList" class="receipt-items-list">
+                            <p class="empty-state">
+                                No items yet. Upload a receipt or click "+ Add Line Item".
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- EQUAL SPLIT NOTE CONTAINER -->
+                    <div id="equalSplitContainer" style="display: none; padding: 16px; background-color: var(--bg-subtle); border-radius: var(--radius-sm); border: 1px solid var(--border-color); margin-bottom: 16px;">
+                        <p style="font-size: 13px; color: var(--text-secondary);">
+                            The total amount will be divided equally across all active members of the selected group. Integer cents remainder is distributed fairly to avoid fractional errors.
+                        </p>
+                    </div>
+
+                    <!-- ASSIGNMENT MATH VERIFICATION STATUS -->
+                    <div class="receipt-split-summary">
+                        <span>Allocation Status</span>
+                        <strong id="receiptAssignmentStatus">No items assigned yet</strong>
+                    </div>
+
+                    <!-- DUPLICATE WARNING CONTAINER -->
+                    <div id="duplicateWarningBox" style="display: none; padding: 12px 16px; background-color: var(--warning-bg); border: 1px solid var(--warning-border); border-radius: var(--radius-sm); margin-bottom: 14px; font-size: 12.5px; color: #92400e;">
+                        <strong>Possible Duplicate Detected:</strong>
+                        <span id="duplicateWarningText"></span>
+                    </div>
+
+                    <button type="button" id="saveReceiptItemsBtn" class="button button-primary form-submit">
+                        Save Itemized Receipt Expense →
+                    </button>
+
+                </div>
+
+                <p id="receiptItemsMessage" class="form-message" role="status"></p>
+
+            </div>
+
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="page-footer">
+            <span>SplitSmart AI</span>
+            <span>·</span>
+            <span>Accurate Receipt OCR Engine</span>
+            <span>·</span>
+            <span>Powered by Tesseract.js & Integer Cents Math</span>
+        </footer>
+
+    </main>
+
+</div>
+
+
+<!-- ==========================================
+     FLOATING FINNY AI ASSISTANT
+     ========================================== -->
+<button
+    type="button"
+    class="finny-floating-button"
+    id="finnyFloatingButton"
+    aria-label="Open Finny AI Assistant"
+    aria-expanded="false">
+    <span>SS</span>
+</button>
+
+<div class="finny-floating-panel" id="finnyFloatingPanel" aria-hidden="true">
+
+    <div class="finny-panel-header">
+        <div class="finny-panel-brand">
+            <div class="brand-fish">SS</div>
+            <div class="finny-panel-title">
+                <strong>Finny Assistant</strong>
+                <small>Financial AI & Analytics</small>
+            </div>
+        </div>
+
+        <button type="button" class="finny-close-button" id="finnyCloseButton" aria-label="Close Assistant">
+            ✕
+        </button>
+    </div>
+
+    <div class="ai-assistant-panel">
+
+        <div class="field assistant-group-selector">
+            <label for="groupSelect">Active Group</label>
+            <select id="groupSelect">
+                <option value="">Select a group</option>
+            </select>
+        </div>
+
+        <div class="ai-chat-window" id="aiChatWindow">
+            <div class="ai-message assistant-message">
+                <div class="ai-message-avatar">SS</div>
+                <div class="ai-message-content">
+                    <strong>Finny</strong>
+                    <p>
+                        Scanning a receipt? You can ask me how to split items, calculate shares, or check previous receipt expenses!
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="ai-suggestions">
+            <button type="button" class="ai-suggestion" data-question="How much has our group spent in total?">
+                Group Total?
+            </button>
+            <button type="button" class="ai-suggestion" data-question="What are our biggest expenses?">
+                Biggest Expenses?
+            </button>
+            <button type="button" class="ai-suggestion" data-question="Explain our group balances.">
+                Explain Balances
+            </button>
+            <button type="button" class="ai-suggestion" data-question="Search expenses for dinner">
+                Search "Dinner"
+            </button>
+        </div>
+
+        <form class="ai-chat-form" id="aiChatForm">
+            <input
+                type="text"
+                id="aiQuestionInput"
+                placeholder="Ask Finny a question..."
+                autocomplete="off"
+                required>
+            <button type="submit" id="aiSendButton" class="button button-primary">
+                Send
+            </button>
+        </form>
+
+        <p class="ai-chat-status" id="aiChatStatus" aria-live="polite"></p>
+
+    </div>
+
+</div>
+
+
+<!-- SCRIPTS -->
+<script src="js/guard.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script src="js/receipt-ocr.js"></script>
+<script src="js/receipt.js"></script>
+<script src="js/assistant.js"></script>
+<script src="js/logout.js"></script>
+<script src="js/ui-enhancements.js"></script>
+</body>
+</html>
