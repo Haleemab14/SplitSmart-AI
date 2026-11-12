@@ -41,21 +41,23 @@ The server listens on `PORT`, default `3000`. Open http://localhost:3000.
 
 Do not commit `.env`, SQLite databases, logs, or `node_modules`. Review the staged files before the first push.
 
-## Render
+## Render Free demo
 
-This project uses `better-sqlite3`. Render's default filesystem is ephemeral, so a redeploy would lose the database unless a **persistent disk** is mounted.
+This demo is temporary. `npm start` runs `node backend/server.js` and listens on Render's `PORT`. In production the process reads Render's environment only and does not load a `.env` file.
 
-Recommended Render settings:
+On boot, with `DATABASE_PATH` unset, the app creates a new empty SQLite file at `backend/database/splitsmart.db` on that instance. Schema setup inserts no accounts, expenses, or payments. The local database is gitignored and must stay on this machine. Do not upload it to GitHub or Render.
 
-- Build: `npm install`
-- Start: `npm start`
-- Health check: `/api/health`
-- Disk: mount `/var/data`
-- `DATABASE_PATH=/var/data/splitsmart.db`
+Render Free storage is ephemeral. A restart or redeploy discards the demo database and creates another empty one.
+
+Set these in the Render dashboard:
+
 - `NODE_ENV=production`
-- Copy the existing `backend/database/splitsmart.db` onto the disk before going live if you need current data. Do not migrate to PostgreSQL unless you later choose a multi-instance database.
+- `JWT_SECRET`: a private random value of at least 32 characters. The server reads only the environment value and refuses known placeholders.
+- `PAYPAL_MODE=sandbox`. Any other mode stops the process. Live payments are not available.
+- `PAYPAL_CLIENT_ID` and `PAYPAL_CLIENT_SECRET`: optional Sandbox credentials. Leave both empty to run without checkout.
+- Leave `GEMINI_API_KEY`, `GEMINI_MODEL`, `ELASTICSEARCH_URL`, and `ELASTICSEARCH_API_KEY` unset. Finny answers from the ledger, and search uses SQLite.
 
-A PostgreSQL migration is not required for a single web service with a persistent disk. It would be required only if you run multiple instances or need managed backups beyond the disk.
+Render sets `RENDER_EXTERNAL_URL` to the service's HTTPS address. Finny and Pay Now send PayPal Sandbox back to that address. Health check: `/api/health`.
 
 ## License
 

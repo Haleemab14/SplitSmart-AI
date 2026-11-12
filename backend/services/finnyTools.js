@@ -1104,15 +1104,32 @@ function executePayload(userId, action) {
     throw new Error("This action cannot be executed.");
 }
 
-async function executePaypal(userId, payload) {
+async function executePaypal(userId, payload, urls) {
+    const returnUrl = urls && urls.returnUrl;
+    const cancelUrl = urls && urls.cancelUrl;
+    const deployedHttps = typeof returnUrl === "string" &&
+        returnUrl.startsWith("https://") &&
+        typeof cancelUrl === "string" &&
+        cancelUrl.startsWith("https://") &&
+        !/localhost|127\.0\.0\.1/i.test(returnUrl) &&
+        !/localhost|127\.0\.0\.1/i.test(cancelUrl);
+
+    if (process.env.NODE_ENV === "production" && !deployedHttps) {
+        throw new Error("PayPal Sandbox needs the deployed HTTPS address.");
+    }
+
+    if (!returnUrl || !cancelUrl) {
+        throw new Error("PayPal Sandbox needs the deployed HTTPS address.");
+    }
+
     const checkout = require("./paypalCheckout");
     const outcome = await checkout.startSettlementCheckout({
         userId,
         groupId: payload.groupId,
         fromId: payload.fromId,
         toId: payload.toId,
-        returnUrl: `http://127.0.0.1:${process.env.PORT || 3000}/challan.html`,
-        cancelUrl: `http://127.0.0.1:${process.env.PORT || 3000}/dashboard.html`
+        returnUrl,
+        cancelUrl
     });
 
     if (!outcome.body.success) {
@@ -1168,7 +1185,7 @@ function publicAction(action, result) {
     };
 }
 
-async function approveAction(userId, actionId) {
+async function approveAction(userId, actionId, checkoutUrlBuilder) {
     const id = clip(actionId, 80);
     const action = db.prepare(`
         SELECT * FROM finny_actions WHERE id = ? AND user_id = ?
@@ -1206,7 +1223,11 @@ async function approveAction(userId, actionId) {
     try {
         const payload = JSON.parse(action.payload_json);
         const result = action.tool_name === "prepare_paypal_payment"
-            ? await executePaypal(userId, payload)
+            ? await executePaypal(
+                userId,
+                payload,
+                typeof checkoutUrlBuilder === "function" ? checkoutUrlBuilder() : null
+            )
             : executePayload(userId, action);
         const status = action.tool_name === "prepare_paypal_payment"
             ? "awaiting_paypal"

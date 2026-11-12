@@ -3,11 +3,51 @@ const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
 
-require("dotenv").config({ path: path.join(__dirname, "../.env") });
+if (process.env.NODE_ENV !== "production") {
+    require("dotenv").config({
+        path: path.join(__dirname, "../.env"),
+        override: false
+    });
+}
+
+const BLOCKED_JWT_SECRETS = new Set([
+    "your_long_random_secret_here",
+    "replace_with_a_long_random_secret",
+    "changeme",
+    "change_me",
+    "secret",
+    "password",
+    "jwt_secret"
+]);
+
+function assertJwtSecret() {
+    const secret = process.env.JWT_SECRET;
+    const normalized = typeof secret === "string" ? secret.trim().toLowerCase() : "";
+
+    if (!secret || BLOCKED_JWT_SECRETS.has(normalized)) {
+        throw new Error("Set a private JWT_SECRET in the environment. SplitSmart AI does not provide a fallback secret.");
+    }
+
+    if (process.env.NODE_ENV === "production" && secret.trim().length < 32) {
+        throw new Error("Set a private JWT_SECRET in the environment. SplitSmart AI does not provide a fallback secret.");
+    }
+}
+
+function assertPaypalSandbox() {
+    const mode = String(process.env.PAYPAL_MODE || "sandbox").trim().toLowerCase();
+
+    if (mode !== "sandbox") {
+        throw new Error("SplitSmart only accepts PayPal Sandbox mode.");
+    }
+}
+
+assertJwtSecret();
+assertPaypalSandbox();
 
 const db = require("./database/db");
 const authenticateUser = require("./middleware/authMiddleware");
 const { elasticConfigured } = require("./config/elastic");
+const { geminiConfigured } = require("./services/finnyAi");
 const paypal = require("./services/paypalService");
 
 const authRoutes = require("./routes/authRoutes");
@@ -29,13 +69,6 @@ const PORT = Number(process.env.PORT) || 3000;
 
 if (process.env.NODE_ENV === "production") {
     app.set("trust proxy", 1);
-}
-
-if (
-    !process.env.JWT_SECRET ||
-    process.env.JWT_SECRET === "your_long_random_secret_here"
-) {
-    throw new Error("Please set a private JWT_SECRET in your .env file.");
 }
 
 app.use(express.json({ limit: "1mb" }));
@@ -66,6 +99,7 @@ app.get("/api/health", (req, res) => {
         message: "SplitSmart AI backend is running!",
         database,
         elasticsearch: elasticConfigured,
+        gemini: geminiConfigured(),
         paypalSandbox: paypal.paypalEnabled(),
         time: new Date().toISOString()
     });

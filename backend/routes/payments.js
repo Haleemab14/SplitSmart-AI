@@ -5,14 +5,6 @@ const { recordPaymentReceipt } = require("../services/finnyTools");
 
 const router = express.Router();
 
-function checkoutUrls(req) {
-    const origin = `${req.protocol}://${req.get("host")}`;
-    return {
-        returnUrl: `${origin}/challan.html`,
-        cancelUrl: `${origin}/dashboard.html`
-    };
-}
-
 router.get("/paypal/config", (req, res) => {
     const enabled = paypal.paypalEnabled();
 
@@ -27,9 +19,9 @@ router.get("/paypal/config", (req, res) => {
 
 router.post("/groups/:groupId/paypal/orders", async (req, res) => {
     const groupId = Number(req.params.groupId);
-    const urls = checkoutUrls(req);
 
     try {
+        const urls = paypal.checkoutUrls(req);
         const outcome = await checkout.startSettlementCheckout({
             userId: req.user.id,
             groupId,

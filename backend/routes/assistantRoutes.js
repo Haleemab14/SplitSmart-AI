@@ -10,6 +10,7 @@ const { getGroupLedger } = require("../services/ledger");
 const finnyAi = require("../services/finnyAi");
 const finnyAgent = require("../services/finnyAgent");
 const finnyTools = require("../services/finnyTools");
+const paypal = require("../services/paypalService");
 const paymentRequests = require("../services/paymentRequests");
 const { userCanAccessGroup } = require("../services/groupAccess");
 // ==========================================
@@ -293,7 +294,11 @@ router.post("/:groupId/assistant-chat", async (req, res) => {
 });
 
 router.post("/assistant-actions/:actionId/approve", async (req, res) => {
-    const outcome = await finnyTools.approveAction(req.user.id, req.params.actionId);
+    const outcome = await finnyTools.approveAction(
+        req.user.id,
+        req.params.actionId,
+        () => paypal.checkoutUrls(req)
+    );
     return res.status(outcome.status).json(outcome.body);
 });
 

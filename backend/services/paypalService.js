@@ -252,6 +252,41 @@ function needsBuyerApproval(order) {
     return status === "CREATED" || status === "PAYER_ACTION_REQUIRED";
 }
 
+function applicationOrigin(req) {
+    const configured = String(process.env.RENDER_EXTERNAL_URL || "").trim().replace(/\/+$/, "");
+
+    if (
+        /^https:\/\/[a-z0-9.-]+(?::\d+)?$/i.test(configured) &&
+        !/localhost|127\.0\.0\.1/i.test(configured)
+    ) {
+        return configured;
+    }
+
+    const host = req && typeof req.get === "function"
+        ? String(req.get("host") || "").trim()
+        : "";
+    const localHost = !host || /^(localhost|127\.0\.0\.1)(:\d+)?$/i.test(host);
+
+    if (process.env.NODE_ENV === "production") {
+        if (localHost) {
+            throw new Error("PayPal Sandbox needs the deployed HTTPS address.");
+        }
+
+        return `https://${host}`;
+    }
+
+    return `http://${host || `127.0.0.1:${process.env.PORT || 3000}`}`;
+}
+
+function checkoutUrls(req) {
+    const origin = applicationOrigin(req);
+
+    return {
+        returnUrl: `${origin}/challan.html`,
+        cancelUrl: `${origin}/dashboard.html`
+    };
+}
+
 module.exports = {
     paypalEnabled,
     createOrder,
@@ -260,5 +295,7 @@ module.exports = {
     readCapture,
     isCaptured,
     orderStatus,
-    needsBuyerApproval
+    needsBuyerApproval,
+    applicationOrigin,
+    checkoutUrls
 };
